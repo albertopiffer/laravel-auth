@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\Project;
+
+use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
@@ -13,7 +17,10 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        //
+        $projects = Project::all();
+        $page_title = 'project-list';
+
+        return view('projects.index', compact('projects'));
     }
 
     /**
@@ -23,7 +30,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        return view('projects.create');
     }
 
     /**
@@ -43,9 +50,9 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Project $project)
     {
-        //
+        return view('projects.show', compact('project'));
     }
 
     /**
@@ -56,7 +63,7 @@ class ProjectController extends Controller
      */
     public function edit($id)
     {
-        //
+        return view('projects.edit', compact('project'));
     }
 
     /**
