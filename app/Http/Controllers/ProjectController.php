@@ -17,7 +17,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::all();
+        $projects = Project::withTrashed()->get();
         $page_title = 'project-list';
 
         return view('projects.index', compact('projects'));
@@ -41,7 +41,12 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $this->validation($request);
+        $data['slug'] = Str::slug($data['title']);
+
+        $newproject = Project::create($data);
+
+        return to_route('projects.show', $newproject);
     }
 
     /**
@@ -61,9 +66,21 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Project $project)
     {
         return view('projects.edit', compact('project'));
+    }
+
+    public function validation(Request $request)
+    {
+        return $request->validate([
+
+            'title' => 'required|max:255|min:3',
+            'description' => 'required|string',
+            'url' => 'required|url',
+            'client' => 'required|string',
+
+        ]);
     }
 
     /**
@@ -73,9 +90,20 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Project $project)
     {
-        //
+        $data = $this->validation($request);
+        $project->update($data);
+
+
+        return to_route('projects.show', $project);
+    }
+
+    public function restore(Project $project)
+    {
+        $project->restore();
+
+        return back();
     }
 
     /**
@@ -84,8 +112,16 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Project $project)
     {
-        //
+        if ($project->trashed()) {
+
+            $project->forceDelete();
+        } else {
+            $project->delete();
+        }
+
+
+        return back();
     }
 }
